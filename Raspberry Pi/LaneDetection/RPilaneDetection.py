@@ -21,6 +21,8 @@ CAM_WIDTH = 160
 CAM_HEIGHT = 120
 NUM_FRAMES = 100    # process this many frames before quitting program
 
+###
+
 class HandCodedLaneFollower(object):
     
     # CONSTRUCTOR

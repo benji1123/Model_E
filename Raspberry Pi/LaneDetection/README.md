@@ -1,12 +1,18 @@
+Contents
+--------
+* __RPilaneDetection.py__: local script
+* __RPilaneDetection_withTimeTest.py__: local script that also evaluates time taken by each function
+
 Process
 --------
 Source-code by [David Tian](https://towardsdatascience.com/deeppicar-part-4-lane-following-via-opencv-737dd9e47c96)
 1. input frame
 2. blue-color filter
 3. Canny Edge Detector
-4. Hough Line Transform
-5. Derive lane-lines
-6. Draw heading
+4. (un-pictured) mask that eliminates top-half of frame
+5. Hough Line Transform
+6. Derive lane-lines
+7. Draw heading
 
 
 ![](images/test.PNG)
