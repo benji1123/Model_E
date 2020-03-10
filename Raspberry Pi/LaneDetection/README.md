@@ -1,3 +1,8 @@
+Contents
+--------
+* __RPilaneDetection.py__: local script
+* __RPilaneDetection_withTimeTest.py__: local script that also evaluates time taken by each function
+
 Process
 --------
 Source-code by [David Tian](https://towardsdatascience.com/deeppicar-part-4-lane-following-via-opencv-737dd9e47c96)
