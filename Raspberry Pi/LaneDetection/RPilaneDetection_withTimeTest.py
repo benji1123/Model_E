@@ -1,3 +1,9 @@
+'''
+This version of the lane-detection-script is essentially the same;
+but, it measures the time spent in each function. This is to narrow down
+our optimization efforts.
+'''
+
 import numpy as np
 import logging
 import math
