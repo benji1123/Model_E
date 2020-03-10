@@ -1,7 +1,21 @@
 '''
 This version of the lane-detection-script is essentially the same;
 but, it measures the time spent in each function. This is to narrow down
-our optimization efforts.
+our optimization efforts:
+
+Data (seconds):
+    detect_edges:  0.007003
+    region_of_interest:  0.0004969
+    detect_line_segments:  0.0110026
+    make_points: 1.81e-05
+    make_points: 3.49e-05
+    average_slope_intercept : 0.0738952
+    detect_lane:  0.1039518
+    compute_steering_angle : 2.09e-05
+    stabilize_steering_angle : 8.8e-06
+    Time taken : 1.1434171199798584 seconds
+    Estimated FPS: 8.745714774828762
+
 '''
 
 import numpy as np
