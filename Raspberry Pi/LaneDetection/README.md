@@ -3,6 +3,19 @@ Contents
 * __RPilaneDetection.py__: local script
 * __RPilaneDetection_withTimeTest.py__: local script that also evaluates time taken by each function
 
+Performance Test
+---------------------
+Time spent in each function (seconds):
+* detect_edges:  0.007003
+* region_of_interest:  0.0004969
+* detect_line_segments:  0.0110026
+* make_points: 1.81e-05
+* make_points: 3.49e-05
+* average_slope_intercept : 0.0738952 <== key bottleneckw
+* detect_lane:  0.1039518
+* compute_steering_angle : 2.09e-05
+* stabilize_steering_angle : 8.8e-06
+
 Process
 --------
 Source-code by [David Tian](https://towardsdatascience.com/deeppicar-part-4-lane-following-via-opencv-737dd9e47c96)
