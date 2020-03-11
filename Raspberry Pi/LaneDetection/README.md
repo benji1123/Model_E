@@ -1,5 +1,6 @@
 Raspberry Pi Setup
 --------
+__Note:__ only connect the camera module when the Pi is __unplugged__
 1. [Flash __Raspbian__ onto the Pi's SD Card with the ___Raspberry Pi Imager___](https://www.raspberrypi.org/downloads/)
 2. __Connect hardware__ and boot up Pi
 3. Open the __console__ and install __OpenCV__:
@@ -7,7 +8,7 @@ Raspberry Pi Setup
 sudo apt update
 sudo apt install python3-opencv
 ```
-4. Enable `camera` in `Preferences > Raspberry Pi Configuration > Interfaces`
+4. Enable `camera` in `Preferences > Raspberry Pi Configuration > Interfaces` [(tutorial)](https://projects.raspberrypi.org/en/projects/getting-started-with-picamera/2)
 5. __Reboot__ the Pi
 6. Test everything by executing __RPilaneDetection.py__ (it's in this directory)
 
