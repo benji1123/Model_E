@@ -1,7 +1,22 @@
-Contents
+Raspberry Pi Setup
 --------
-* __RPilaneDetection.py__: local script
+1. [Flash __Raspbian__ onto the Pi's SD Card with the ___Raspberry Pi Imager___](https://www.raspberrypi.org/downloads/)
+2. __Connect hardware__ and boot up Pi
+3. Open the __console__ and install __OpenCV__:
+```console
+sudo apt update
+sudo apt install python3-opencv
+```
+4. Enable `camera` in `Preferences > Raspberry Pi Configuration > Interfaces`
+5. __Reboot__ the Pi
+6. Test everything by executing __RPilaneDetection.py__ (it's in this directory)
+
+Executables
+--------
+
+* __RPilaneDetection.py__: the simple lane-detection script to be run locally on the Pi
 * __RPilaneDetection_withTimeTest.py__: local script that also evaluates time taken by each function
+
 
 Performance Test
 ---------------------
