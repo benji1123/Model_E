@@ -1,10 +1,7 @@
 '''
 SPEED TEST
 ---------
-- Dell XPS 13: 
-    - 20 fps with native webcam res 
-    - 18 fps with enforced 640x420 res
-- Raspberry Pi:  
+- 12 FPS on Pi
 '''
 import numpy as np
 import logging
@@ -152,7 +149,8 @@ def average_slope_intercept(frame, line_segments_arr):
 
     # use SLOPE to differentite L&R lane-segments
     for line_segment in line_segments_arr:
-        for x1, y1, x2, y2 in line_segment:        
+        for x1, y1, x2, y2 in line_segment:
+            sleep(0.0001)
             if x1 == x2:
                 logging.info('skipping vertical line segment (slope=inf): %s' % line_segment)
                 continue
@@ -289,8 +287,14 @@ def make_points(frame, line):
     y2 = int(y1 * 1 / 2)  # make points from middle of the frame down
 
     # bound the coordinates within the frame
-    x1 = max(-width, min(2 * width, int((y1 - intercept) / slope)))
-    x2 = max(-width, min(2 * width, int((y2 - intercept) / slope)))
+    x1,x2 = 0,0
+    try:
+        x1 = max(-width, min(2 * width, int((y1 - intercept) / slope)))
+        x2 = max(-width, min(2 * width, int((y2 - intercept) / slope)))
+    except OverflowError:
+        print('skip: slope = infinity')
+        
+        
     return [[x1, y1, x2, y2]]
 
 ############################
