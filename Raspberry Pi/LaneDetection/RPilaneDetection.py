@@ -16,6 +16,7 @@ import time
 
 _SHOW_IMAGE = False
 _ENFORCE_RESOLUTION = True
+_KEEP_RUNNING = True
 
 CAM_WIDTH = 160
 CAM_HEIGHT = 120
@@ -341,13 +342,15 @@ def test_video(video_file):
             cv2.imshow("Road with Lane line", combo_image)
             i += 1
 
-            if i >= NUM_FRAMES:
-                getFPS(start, i)
-                break
+            if not _KEEP_RUNNING:
+                if i >= NUM_FRAMES:
+                    getFPS(start, i)
+                    break
 
             # press 'q' to quit
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 # print overall FPS
+                getFPS(start, i)
                 break
     finally:
         cap.release()
