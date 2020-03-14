@@ -15,7 +15,7 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 time.sleep(0.1)
 
 
-template = cv2.imread("stop_sign.jpg",0) #read template image (stop sign)
+template = cv2.imread("assets/stop_sign.jpg",0) #read template image (stop sign)
 template = cv2.resize(template, (0,0), fx=0.7, fy=0.7) #change size of template to match size of sign in source image
 w, h = template.shape[::-1] #get width and height of sign
 

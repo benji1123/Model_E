@@ -1,7 +1,7 @@
 '''
 SPEED TEST
 ---------
-- 12 FPS on Pi
+8-17 FPS on Pi
 '''
 import numpy as np
 import logging
@@ -20,6 +20,10 @@ CAM_WIDTH = 160
 CAM_HEIGHT = 120
 NUM_FRAMES = 100    # process this many frames before quitting program
 
+# Stop Sign Object
+template = cv2.imread("images/stop_sign.jpg",0) #read template image (stop sign)
+template = cv2.resize(template, (0,0), fx=0.7, fy=0.7) #change size of template to match size of sign in source image
+w_stop, h_stop = template.shape[::-1] #get width and height of sign
 
 class HandCodedLaneFollower(object):
     
@@ -28,6 +32,7 @@ class HandCodedLaneFollower(object):
         logging.info('Creating a HandCodedLaneFollower...')
         self.car = car
         self.curr_steering_angle = 90
+        self.stop = False                   # stop-sign detection
 
     # FINDS & PROCESSES LANE-LINES
     def follow_lane(self, frame):
@@ -55,6 +60,23 @@ class HandCodedLaneFollower(object):
         show_image("heading", curr_heading_image)
 
         return curr_heading_image
+
+    # CHECK FOR STOP SIGN
+    def checkStopSign(self, frame):
+        source_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        result = cv2.matchTemplate(source_gray,template,cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result) # get location of match in source image (max_loc), get correlation (max_val)
+        threshold = 0.4
+        
+        # check sop-sign
+        if max_val >= threshold:
+            self.stop = True
+            cv2.rectangle(frame, max_loc, (max_loc[0] + w_stop, max_loc[1] + h_stop), (0,255,255), 2)  #draw rectangle based on max_loc
+        else:
+            self.stop = False
+        if self.stop: 
+            print("STOP!")
+        return
 
 
 ############################
@@ -297,6 +319,7 @@ def make_points(frame, line):
         
     return [[x1, y1, x2, y2]]
 
+
 ############################
 # Test Functions
 ############################
@@ -338,12 +361,6 @@ def test_video(video_file):
     start = time.time()
     end = 0
 
-    # stop sign object
-    template = cv2.imread("stop_sign.jpg",0) #read template image (stop sign)
-    template = cv2.resize(template, (0,0), fx=0.7, fy=0.7) #change size of template to match size of sign in source image
-    w_stop, h_stop = template.shape[::-1] #get width and height of sign
-    stop = False
-
     # camera-feed loop (sign detection + lane detection)
     try:
         i = 0
@@ -351,39 +368,25 @@ def test_video(video_file):
             sleep(0.01)
             _, frame = cap.read()
             
-            if i%10 == 0:
+            if i%10 == 0: # only print every other frame
                 print('frame %s' % i )
 
-            # LOOK FOR STOP SIGN
-            source_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            result = cv2.matchTemplate(source_gray,template,cv2.TM_CCOEFF_NORMED) #find match in source image
-            _, max_val, _, max_loc = cv2.minMaxLoc(result) #get location of match in source image (max_loc), get correlation (max_val)
-            threshold = 0.4 #set threshold for co
-
-            if max_val >= threshold:
-                stop = True
-                # cv2.rectangle(image, max_loc, (max_loc[0] + w_stop, max_loc[1] + h_stop), (0,255,255), 2)  #draw rectangle based on max_loc
-            else:
-                stop = False
-            if stop == True:
-                print("STOP!")
-            else:
-                print("GO!")
+            lane_follower.checkStopSign(frame)
 
             # LANE DETECTION
-            combo_image= lane_follower.follow_lane(frame)
+            combo_image = lane_follower.follow_lane(frame)
             cv2.imwrite("%s_%03d_%03d.png" % (video_file, i, lane_follower.curr_steering_angle), frame)
             cv2.imwrite("%s_overlay_%03d.png" % (video_file, i), combo_image)
             video_overlay.write(combo_image)
             cv2.imshow("Road with Lane line", combo_image)
             i += 1
 
-            # automatically QUIT after `NUM_FRAMES` frames
+            # QUIT after a certain number of frames
             if not _KEEP_RUNNING:
                 if i >= NUM_FRAMES:
                     getFPS(start, i)
                     break
-            # press 'q' to quit
+            # press 'q' to quit anytime
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 # print overall FPS
                 getFPS(start, i)
