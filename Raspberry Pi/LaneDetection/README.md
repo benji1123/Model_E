@@ -21,7 +21,7 @@ __Press 'Q' to exit the camera-preview__
 
 Stop Sign Detection
 ----------
-This part is _jenky_. It doesn't use a __neural network__, but a simple `matchTemplate()` function from [OpenCV](https://docs.opencv.org/2.4/doc/tutorials/imgproc/histograms/template_matching/template_matching.html). The easist potential solution is experimenting with the `threshold` variable. The higher you set it, the more strict the algorithm is with what it considers a _stop sign_. Hopefully this quick fix will be enough.
+This part is _jenky_. It doesn't use a __neural network__, but a simple `matchTemplate()` function from [OpenCV](https://docs.opencv.org/2.4/doc/tutorials/imgproc/histograms/template_matching/template_matching.html). The easist potential solution is experimenting with the `threshold` variable. The higher you set it, the more strict the algorithm is with what it considers a _stop sign_. Hopefully this quick fix will be enough. __Below is an example of a false-positive with `threshold = 0.4`__.
 
 ![](images/stop-sign-error.PNG)
 
