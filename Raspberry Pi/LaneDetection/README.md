@@ -52,3 +52,10 @@ Time spent in each function (seconds):
 * _detect_lane_:  0.1039518
 * _compute_steering_angle_ : 2.09e-05
 * _stabilize_steering_angle_ : 8.8e-06
+
+Known Errors
+------------------------
+```
+E: Unable to acquire the dpkg frontend lock ...
+```
+According to Matteo, this error occurs a lot in Linux when other processes are accessing __apt__. So just close all your terminal-windows and try again. Worst case, restart the Pi.
