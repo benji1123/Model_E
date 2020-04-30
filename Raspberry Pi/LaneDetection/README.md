@@ -17,8 +17,15 @@ Executables
 
 * __RPilaneDetection.py__: the simple lane-detection script to be run locally on the Pi
 * __RPilaneDetection_withTimeTest.py__: local script that also evaluates time taken by each function
+__Press 'Q' to exit the camera-preview__
 
-Process
+Stop Sign Detection
+----------
+This part is _jenky_. It doesn't use a __neural network__, but a simple `matchTemplate()` function from [OpenCV](https://docs.opencv.org/2.4/doc/tutorials/imgproc/histograms/template_matching/template_matching.html). The easist potential solution is experimenting with the `threshold` variable. The higher you set it, the more strict the algorithm is with what it considers a _stop sign_. Hopefully this quick fix will be enough. __Below is an example of a false-positive with `threshold = 0.4`__.
+
+![](images/stop-sign-error.PNG)
+
+Lane Detection Image Processing
 --------
 Source-code by [David Tian](https://towardsdatascience.com/deeppicar-part-4-lane-following-via-opencv-737dd9e47c96)
 
@@ -52,3 +59,10 @@ Time spent in each function (seconds):
 * _detect_lane_:  0.1039518
 * _compute_steering_angle_ : 2.09e-05
 * _stabilize_steering_angle_ : 8.8e-06
+
+Known Errors
+------------------------
+```
+E: Unable to acquire the dpkg frontend lock ...
+```
+According to Matteo, this error occurs a lot in Linux when other processes are accessing __apt__. So just close all your terminal-windows and try again. Worst case, restart the Pi.

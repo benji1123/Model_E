@@ -1,10 +1,7 @@
 '''
 SPEED TEST
 ---------
-- Dell XPS 13: 
-    - 20 fps with native webcam res 
-    - 18 fps with enforced 640x420 res
-- Raspberry Pi:  
+8-17 FPS on Pi
 '''
 import numpy as np
 import logging
@@ -13,6 +10,7 @@ import datetime
 import sys
 import cv2
 import time
+from time import sleep
 
 _SHOW_IMAGE = False
 _ENFORCE_RESOLUTION = True
@@ -22,7 +20,10 @@ CAM_WIDTH = 160
 CAM_HEIGHT = 120
 NUM_FRAMES = 100    # process this many frames before quitting program
 
-###
+# Stop Sign Object
+template = cv2.imread("images/stop_sign.jpg",0) #read template image (stop sign)
+template = cv2.resize(template, (0,0), fx=0.7, fy=0.7) #change size of template to match size of sign in source image
+w_stop, h_stop = template.shape[::-1] #get width and height of sign
 
 class HandCodedLaneFollower(object):
     
@@ -31,6 +32,7 @@ class HandCodedLaneFollower(object):
         logging.info('Creating a HandCodedLaneFollower...')
         self.car = car
         self.curr_steering_angle = 90
+        self.stop = False                   # stop-sign detection
 
     # FINDS & PROCESSES LANE-LINES
     def follow_lane(self, frame):
@@ -50,7 +52,7 @@ class HandCodedLaneFollower(object):
         # compute STEERING ANGLE
         new_steering_angle = compute_steering_angle(frame, lane_lines_arr)
         self.curr_steering_angle = stabilize_steering_angle(self.curr_steering_angle, new_steering_angle, len(lane_lines_arr))
-        
+
         # Send steering-signal to Arduino
         if self.car is not None:
             self.car.front_wheels.turn(self.curr_steering_angle)
@@ -58,6 +60,23 @@ class HandCodedLaneFollower(object):
         show_image("heading", curr_heading_image)
 
         return curr_heading_image
+
+    # CHECK FOR STOP SIGN
+    def checkStopSign(self, frame):
+        source_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        result = cv2.matchTemplate(source_gray,template,cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result) # get location of match in source image (max_loc), get correlation (max_val)
+        threshold = 0.4
+        
+        # check sop-sign
+        if max_val >= threshold:
+            self.stop = True
+            cv2.rectangle(frame, max_loc, (max_loc[0] + w_stop, max_loc[1] + h_stop), (0,255,255), 2)  #draw rectangle based on max_loc
+        else:
+            self.stop = False
+        if self.stop: 
+            print("STOP!")
+        return
 
 
 ############################
@@ -152,7 +171,8 @@ def average_slope_intercept(frame, line_segments_arr):
 
     # use SLOPE to differentite L&R lane-segments
     for line_segment in line_segments_arr:
-        for x1, y1, x2, y2 in line_segment:        
+        for x1, y1, x2, y2 in line_segment:
+            sleep(0.0001)
             if x1 == x2:
                 logging.info('skipping vertical line segment (slope=inf): %s' % line_segment)
                 continue
@@ -289,9 +309,16 @@ def make_points(frame, line):
     y2 = int(y1 * 1 / 2)  # make points from middle of the frame down
 
     # bound the coordinates within the frame
-    x1 = max(-width, min(2 * width, int((y1 - intercept) / slope)))
-    x2 = max(-width, min(2 * width, int((y2 - intercept) / slope)))
+    x1,x2 = 0,0
+    try:
+        x1 = max(-width, min(2 * width, int((y1 - intercept) / slope)))
+        x2 = max(-width, min(2 * width, int((y2 - intercept) / slope)))
+    except OverflowError:
+        print('skip: slope = infinity')
+        
+        
     return [[x1, y1, x2, y2]]
+
 
 ############################
 # Test Functions
@@ -333,24 +360,33 @@ def test_video(video_file):
     # make a timer for FPS computation
     start = time.time()
     end = 0
+
+    # camera-feed loop (sign detection + lane detection)
     try:
         i = 0
         while cap.isOpened():
+            sleep(0.01)
             _, frame = cap.read()
-            print('frame %s' % i )
-            combo_image= lane_follower.follow_lane(frame)
+            
+            if i%10 == 0: # only print every other frame
+                print('frame %s' % i )
+
+            lane_follower.checkStopSign(frame)
+
+            # LANE DETECTION
+            combo_image = lane_follower.follow_lane(frame)
             cv2.imwrite("%s_%03d_%03d.png" % (video_file, i, lane_follower.curr_steering_angle), frame)
             cv2.imwrite("%s_overlay_%03d.png" % (video_file, i), combo_image)
             video_overlay.write(combo_image)
             cv2.imshow("Road with Lane line", combo_image)
             i += 1
 
+            # QUIT after a certain number of frames
             if not _KEEP_RUNNING:
                 if i >= NUM_FRAMES:
                     getFPS(start, i)
                     break
-
-            # press 'q' to quit
+            # press 'q' to quit anytime
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 # print overall FPS
                 getFPS(start, i)
@@ -362,7 +398,7 @@ def test_video(video_file):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.INFO)
     test_video('/home/pi/DeepPiCar/driver/data/tmp/video01')
     # test_photo('images/test.png')
     #test_photo(sys.argv[1])
